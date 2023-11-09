@@ -60,7 +60,7 @@ Type the following command to see what is currently listening to port 53:
 
 This may output something similar to:
 
-![Alt text](image-1.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-1.png)
 
 This example shows that port 53 is currently in use and being listened to.  If you had pihole, unbound or some other DNS based service it should show up with the above command. You would then have to remove it at this point to proceed with the guide.
 
@@ -95,7 +95,7 @@ Checking the file is there:
 
 `ls -lah`
 
-![Alt text](image-3.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-3.png)
 
 Extracting the file:
 
@@ -103,7 +103,7 @@ Extracting the file:
 
 Running `ls -lah` will reveal that there is a new folder there:
 
-![Alt text](image-2.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-2.png)
 
 Lets change into that directory and see what is in there:
 
@@ -111,11 +111,11 @@ Lets change into that directory and see what is in there:
 
 `ls -lah`
 
-![Alt text](image-4.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-4.png)
 
 We can see there is an executable file along with some .txt and a .toml files. 
 
-![Alt text](image-5.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-5.png)
 
 Lets use one of these to create our basic config which we will customise later on. 
 
@@ -135,7 +135,7 @@ To disable the inbuilt systemd-resolved process enter the following commands:
 
 `systemctl status systemd-resolved`
 
-![Alt text](image-6.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-6.png)
 
 Clear out of the status information with:
 
@@ -145,7 +145,7 @@ Check that nothing is listening to port 53 anymore:
 
 `ss -lp 'sport = :domain'`
 
-![Alt text](image-7.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-7.png)
 
 Looks fine? Let's move to the next step.
 
@@ -159,7 +159,7 @@ Now that we have a basic base line let's do a test run of the `dnscrypt-proxy` p
 
 This may take a while as it will try to contact a large list of DNS resolvers. Let it run until it stops and we get a message that says it has worked.
 
-![Alt text](image-8.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-8.png)
 
 Now we have checked that the system is primed and capable of running DNSCrypt-proxy without issues we can end the process with:
 
@@ -171,7 +171,7 @@ Lets open up the config file and start making some changes.
 
 `nano dnscrypt-proxy.toml`
 
-![Alt text](image-9.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-9.png)
 
 The initial changes will be around DNSSEC, IPv4 & IPv6 and the listen address (the address DNSCrypt-proxy will listen for incoming DNS requests).
 
@@ -259,13 +259,13 @@ Uncomment out this line:
 
 `# server_names = ['scaleway-fr', 'google', 'yandex', 'cloudflare']`
 
-![Alt text](image-10.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-10.png)
 
 We want to change this line to the following:
 
 `server_names = ['quad9-dnscrypt-ip4-filter-ecs-pri', 'quad9-dnscrypt-ip4-filter-ecs-alt', 'quad9-dnscrypt-ip6-filter-ecs-pri', 'quad9-dnscrypt-ip6-filter-ecs-alt']`
 
-![Alt text](image-11.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-11.png)
 
 This is where you would choose to enable or disable filtering and ECS functionality. Replace the respective server names with the ones you wish to use.
 
@@ -275,7 +275,7 @@ Here is where we will specify our server list for DNScrypt to use.
 
 Here you can see the default settings.
 
-![Alt text](image-12.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-12.png)
 
 This is where DNSCrypt was getting all of those public DNS resolvers we saw it running through before. We want to comment that section out and then enable the quad9 section.
 
@@ -474,7 +474,7 @@ IPv6:
 
 `::1#5353`
 
-![Alt text](image-13.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-13.png)
 
 Scroll to the bottom and click Save.
 
@@ -516,7 +516,7 @@ You should get one of the following responses:
 
 ```
 
-![Alt text](image-14.png)
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-14.png)
 
 ### Step 12
 
