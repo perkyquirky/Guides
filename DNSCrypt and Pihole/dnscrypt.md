@@ -4,7 +4,7 @@
 
 You may have found this as you are on a journey to improve your own digital privacy and I hope you find it useful.
 
-The reason why I chose to do this instead of running pihole with unbound is that with unbound even though you are communicating directly with the *blah* it is still in plain text unless you use DNS over HTTPS. But at that point you are deciding to pick between the superior caching features of Unbound or the protection that Quad9 provides with their malicious domain filters. I decided I would rather have that extra layer of protection with Quad9's filters and at the time of writing feel I can trust Quad9 with keeping my DNS queries private. As Quad9, Cloudflare, Google etc do not post their malicious domain filter lists, as it would alert the threat actors, there is no way to replicate this at home as far as I know. 
+The reason why I chose to do this instead of running pihole with unbound is that with unbound even though you are communicating directly in plain text unless you use DNS over HTTPS. But at that point you are deciding to pick between the superior caching features of Unbound or the protection that Quad9 provides with their malicious domain filters. I decided I would rather have that extra layer of protection with Quad9's filters and at the time of writing feel I can trust Quad9 with keeping my DNS queries private. As Quad9, Cloudflare, Google etc do not post their malicious domain filter lists, as it would alert the threat actors, there is no way to replicate this at home as far as I know. 
 
 What these three combined will do:
 
