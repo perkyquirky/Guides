@@ -6,6 +6,8 @@ You may have found this as you are on a journey to improve your own digital priv
 
 The reason why I chose to do this instead of running pihole with unbound is that with unbound even though you are communicating directly in plain text unless you use DNS over HTTPS. But at that point you are deciding to pick between the superior caching features of Unbound or the protection that Quad9 provides with their malicious domain filters. I decided I would rather have that extra layer of protection with Quad9's filters and at the time of writing feel I can trust Quad9 with keeping my DNS queries private. As Quad9, Cloudflare, Google etc do not post their malicious domain filter lists, as it would alert the threat actors, there is no way to replicate this at home as far as I know. 
 
+One of the main benefits of this path is that you will have network wide secured DNS. While most browsers and operating systems now support DNS over HTTPS, and those settings have their place, these options will not cover all other devices or programs on your network.  It is safe to assume that any program or device has has internet connectivity will be sending and receiving DNS requests.
+
 What these three combined will do:
 
 - Block ads and trackers along with any other optional block lists you may add to Pi-hole
@@ -15,7 +17,6 @@ What these three combined will do:
 - Take advantage of Quad9's malicious domain block list
 - Speed up your everyday browsing due to pihole caching
 
-
 What they will NOT do:
 
 - Hide your IP address / anonymise you from the sites you visit
@@ -23,7 +24,11 @@ What they will NOT do:
 - Replace an antivirus
 - Stop operating system level tracking / content scanning (e.g. Microsoft analytics)
 
-## Guide Preface
+Keep in mind:
+
+This setup will not cover you if your devices are not connected to the network you have installed this on. One example would be if you leave home and disconnect from your wifi, swapping to mobile data, you are now likely going to be using your mobile carrier DNS servers. In this case you may want to set up DNS over HTTPS in your mobile phones operating system for when you leave home. You could also setup a VPN service on your mobile devices back to your home network so when you do leave home you can route your traffic back to your home network and then you will regain your networks capabilities.
+
+## Guide Introduction
 
 I have tried to write this in a way that anyone who has used virtual machines and linux could follow.
 
@@ -31,26 +36,26 @@ The steps in the guide have been created on a Proxmox VM with Ubuntu Server 22.0
 
 It is assumed you have installed Ubuntu Server on a VM or bare metal or you are able to follow the steps yourself with your chosen operating system.
 
-It will make your life incredibly easier if you do this on a clean operating system with nothing else installed.
+It will make your life easier if you do this on a clean operating system with nothing else installed.
 
-The first time I attempted this I had already installed Pihole and Docker (Docker not required) and it caused me so many issues it was easier to start from scratch.
+The first time I attempted this I had already installed Pihole and Docker (Docker not required) and it caused me issues, it was simpler to start with a fresh OS.
 
-At the bottom will be links to official documentation if that assists you.
+At the bottom will be links to official documentation if that assists you, there are some troubleshooting steps in the official dnscrypt github page should you need it.
 
 
 ## Installing DNSCrypt-proxy
 
 ### Step 1
 
-Elevate your console to root as you will be requiring it a LOT and doing so will bypass a lot of password entries.
+Elevate your console to root as you will be requiring elevated privileges a LOT and doing so will bypass a lot of password entries.
 
 `sudo -s`
 
 ### Step 2 
 
-Check what listening to port 53.
+Check what is listening on port 53.
 
-If there is a service running on port 53 it will cause a conflict and DNSCrypt will not run successfully.  This is why I mentioned not installing Pihole first.
+If there is a service running on port 53 it will cause a conflict and DNSCrypt this process will not be successful.  This is why I mentioned not installing Pihole first.
 
 Later on we will be disabling the operating system's DNS functionality and replacing it with DNSCrypt-proxy.
 
