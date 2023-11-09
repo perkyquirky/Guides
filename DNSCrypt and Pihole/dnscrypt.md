@@ -509,6 +509,10 @@ These commands will clear any errors.
 
 The final step is to set your network to forward all DNS requests to the Pihole / DNSCrypt machine. This can be done in what ever router you use, most likely in the internet connection settings you have. I cannot help you there I am afraid. 
 
+E.g:
+
+![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-15.png)
+
 Now the DNS communication path is complete!
 
 ### Step 11
