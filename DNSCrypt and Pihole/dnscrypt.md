@@ -547,7 +547,7 @@ I hope you found this guide helpful, thank you.
 
 ### Helpful links
 
-https://quad9.zendesk.com/hc/en-us/articles/10514256222349-Protocol-Test-Confirm-on-which-Protocol-Quad9-received-your-query-DNS-over-HTTPS-DNS-over-TLS-DNSCrypt-or-Plaintext
+https://docs.quad9.net/FAQs/#protocol-test-confirm-on-which-protocol-quad9-received-your-query
 
 https://github.com/DNSCrypt/dnscrypt-proxy/releases/
 
