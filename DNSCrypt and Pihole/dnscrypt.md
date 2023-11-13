@@ -1,14 +1,10 @@
-# Pi-hole with DNSCrypt-proxy to Quad9 on Ubuntu Server 22.04
+## Pi-hole with DNSCrypt-proxy to Quad9 on Ubuntu Server 22.04
 
-## Preface
+### Preface
 
 You may have found this as you are on a journey to improve your own digital privacy and I hope you find it useful.
 
 The reason why I chose to do this instead of running pihole with unbound is that with unbound even though you are communicating directly in plain text unless you use DNS over HTTPS. But at that point you are deciding to pick between the superior caching features of Unbound or the protection that Quad9 provides with their malicious domain filters. I decided I would rather have that extra layer of protection with Quad9's filters and at the time of writing feel I can trust Quad9 with keeping my DNS queries private. As Quad9, Cloudflare, Google etc do not post their malicious domain filter lists, as it would alert the threat actors, there is no way to replicate this at home as far as I know. 
-
-One of the main benefits of this path is that you will have network wide secured DNS. While most browsers and operating systems now support DNS over HTTPS, and those settings have their place, these options will not cover all other devices or programs on your network.  It is safe to assume that any program or device has has internet connectivity will be sending and receiving DNS requests.
-
-To clear up some possible confusion around DNSCrypt, DNSCrypt is a protocol for secure DNS requests. DNSCrypt-proxy is a program for using the DNSCrypt protocol.
 
 What these three combined will do:
 
@@ -19,6 +15,7 @@ What these three combined will do:
 - Take advantage of Quad9's malicious domain block list
 - Speed up your everyday browsing due to pihole caching
 
+
 What they will NOT do:
 
 - Hide your IP address / anonymise you from the sites you visit
@@ -26,11 +23,7 @@ What they will NOT do:
 - Replace an antivirus
 - Stop operating system level tracking / content scanning (e.g. Microsoft analytics)
 
-Keep in mind:
-
-This setup will not cover you if your devices are not connected to the network you have installed this on. One example would be if you leave home and disconnect from your wifi, swapping to mobile data, you are now likely going to be using your mobile carrier DNS servers. In this case you may want to set up DNS over HTTPS in your mobile phones operating system for when you leave home. You could also setup a VPN service on your mobile devices back to your home network so when you do leave home you can route your traffic back to your home network and then you will regain your networks capabilities.
-
-## Guide Introduction
+### Guide Preface
 
 I have tried to write this in a way that anyone who has used virtual machines and linux could follow.
 
@@ -38,28 +31,27 @@ The steps in the guide have been created on a Proxmox VM with Ubuntu Server 22.0
 
 It is assumed you have installed Ubuntu Server on a VM or bare metal or you are able to follow the steps yourself with your chosen operating system.
 
-It will make your life easier if you do this on a clean operating system with nothing else installed.
+It will make your life incredibly easier if you do this on a clean operating system with nothing else installed.
 
-The first time I attempted this I had already installed Pihole and Docker (Docker not required) and it caused me issues, it was simpler to start with a fresh OS.
+The first time I attempted this I had already installed Pihole and Docker (Docker not required) and it caused me so many issues it was easier to start from scratch.
 
-At the bottom will be links to official documentation if that assists you, there are some troubleshooting steps in the official dnscrypt github page should you need it.
+At the bottom will be links to official documentation if that assists you.
 
+---
+### Installing DNSCrypt-proxy
 
-## Installing DNSCrypt-proxy
+#### Step 1
 
-### Step 1
-
-*Make sure to set a manually assigned IP address to the system!*
-
-Elevate your console to root as you will be requiring elevated privileges a LOT and doing so will bypass a lot of password entries.
+Elevate your console to root as you will be requiring it a LOT and doing so will bypass a lot of password entries.
 
 `sudo -s`
 
-### Step 2 
+---
+#### Step 2 
 
-Check what is listening on port 53.
+Check what listening to port 53.
 
-If there is a service running on port 53 it will cause a conflict and DNSCrypt this process will not be successful.  This is why I mentioned not installing Pihole first.
+If there is a service running on port 53 it will cause a conflict and DNSCrypt will not run successfully.  This is why I mentioned not installing Pihole first.
 
 Later on we will be disabling the operating system's DNS functionality and replacing it with DNSCrypt-proxy.
 
@@ -69,17 +61,18 @@ Type the following command to see what is currently listening to port 53:
 
 This may output something similar to:
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-1.png)
+![Alt text](image-1.png)
 
 This example shows that port 53 is currently in use and being listened to.  If you had pihole, unbound or some other DNS based service it should show up with the above command. You would then have to remove it at this point to proceed with the guide.
 
 It is currently in use by the systemd-resolved process which is the inbuilt DNS process for resolving DNS requests.
 
-### Step 3
+---
+#### Step 3
 
 Download DNSCrypt-proxy install files.
 
-Before we disable the systemd-resolved process we need to download the DNSCrypt install files, if we disable it before downloading we wont be able to resolve the address in the wget download request.
+Before we disable the systemd-resolved process we need to download the DNSCrypt install files, if we disable it before downloading we wont be able to resolve the address in the wget.
 
 [DNSCrypt download link](https://github.com/jedisct1/dnscrypt-proxy/releases/latest)
 
@@ -104,7 +97,7 @@ Checking the file is there:
 
 `ls -lah`
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-3.png)
+![Alt text](image-3.png)
 
 Extracting the file:
 
@@ -112,7 +105,7 @@ Extracting the file:
 
 Running `ls -lah` will reveal that there is a new folder there:
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-2.png)
+![Alt text](image-2.png)
 
 Lets change into that directory and see what is in there:
 
@@ -120,23 +113,24 @@ Lets change into that directory and see what is in there:
 
 `ls -lah`
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-4.png)
+![Alt text](image-4.png)
 
 We can see there is an executable file along with some .txt and a .toml files. 
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-5.png)
+![Alt text](image-5.png)
 
-Lets use one of these example files to create our basic config which we will customise later on. 
+Lets use one of these to create our basic config which we will customise later on. 
 
 `cp example-dnscrypt-proxy.toml dnscrypt-proxy.toml`
 
-This newly created `dnscrypt-proxy.toml` is where all of the configuration lies for DNSCrypt-proxy.
+This newly created `dnscrypt-proxy.toml` is where all of the configuration lies for how DNSCrypt-proxy will run.
 
-### Step 4
+---
+#### Step 4
 
 Disabling systemd-resolved for testing.
 
-To disable the systemd-resolved process enter the following commands:
+To disable the inbuilt systemd-resolved process enter the following commands:
 
 `systemctl stop systemd-resolved`
 
@@ -144,9 +138,9 @@ To disable the systemd-resolved process enter the following commands:
 
 `systemctl status systemd-resolved`
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-6.png)
+![Alt text](image-6.png)
 
-Clear out of the status check with:
+Clear out of the status information with:
 
 `ctrl + c`
 
@@ -154,21 +148,22 @@ Check that nothing is listening to port 53 anymore:
 
 `ss -lp 'sport = :domain'`
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-7.png)
+![Alt text](image-7.png)
 
-Looks fine? Let's move to the next step. If there is something here you will have to work out what process that is, stop it and remove it but it should be empty now if you have started with a clean OS.
+Looks fine? Let's move to the next step.
 
-### Step 5
+---
+#### Step 5
 
 Initial configuration and test running.
 
-Now that we have a base configuration let's do a test run of the `dnscrypt-proxy` program.
+Now that we have a basic base line let's do a test run of the `dnscrypt-proxy` program.
 
 `./dnscrypt-proxy`
 
 This may take a while as it will try to contact a large list of DNS resolvers. Let it run until it stops and we get a message that says it has worked.
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-8.png)
+![Alt text](image-8.png)
 
 Now we have checked that the system is primed and capable of running DNSCrypt-proxy without issues we can end the process with:
 
@@ -180,7 +175,7 @@ Lets open up the config file and start making some changes.
 
 `nano dnscrypt-proxy.toml`
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-9.png)
+![Alt text](image-9.png)
 
 The initial changes will be around DNSSEC, IPv4 & IPv6 and the listen address (the address DNSCrypt-proxy will listen for incoming DNS requests).
 
@@ -246,29 +241,18 @@ Run DNSCrypt-proxy again.
 
 `./dnscrypt-proxy`
 
-We should get a similar result to the first time.
+We should get a similar result to the first time. Exit once it has successfully run. 
 
 Once DNSCrypt has run successfully, exit out with `ctrl + c`.
 
-### Step 6
+---
+#### Step 6
 
 Setting up Quad9 DNS services.
 
 We are now at the point where you can choose what exact service with Quad9 you wish to use. You could skip this part if you want to use the vast array of available DNS servers but I know nothing about these servers so I only wany my requests going to Quad9.
 
- The guide will be using their DNSCrypt encryption protocol, malicious domain filtering, ECS enabled. Quad9 have an exhaustive list of services available [here](https://www.quad9.net/quad9-resolvers.md). You can pick and choose exactly which services you wish to use if you don't want filtering or ECS. If you wish to deviate from the configuration below note that the server name is in the commented out line within the markdown file linked above, it will require you to add a prefix of `quad9-` to it.  E.g. for disabled ECS find the line `## dnscrypt-ip4-filter-pri` and add quad9- and remove the comment marks so it looks like `quad9-dnscrypt-ip4-filter-pri` then you can paste this into the correct place in the  dnscrypt-proxy.toml` file.
-
- E.g:
-
-```
-ECS enabled: quad9-dnscrypt-ip4-filter-ecs-pri
-
-ECS disabled: quad9-dnscrypt-ip4-filter-pri
-
-Malicious filter enabled: quad9-dnscrypt-ip4-filter-ecs-pri
-
-Malicious filter disabled: quad9-dnscrypt-ip4-nofilter-ecs-pri
-```
+ The guide will be using their DNSCrypt encryption protocol, malicious domain filtering, ECS enabled. Quad9 have an exhaustive list of services available [here](https://www.quad9.net/quad9-resolvers.md). You can pick and choose exactly which services you wish to use if you don't want filtering or ECS disabled. If you wish to deviate from the configuration below note that the server name is in the commented out line, but it will require you to add a prefix of `quad9-` to it.  E.g. for disabled ECS find the line `## dnscrypt-ip4-filter-pri` and add quad9- and remove the comment marks so it looks like `quad9-dnscrypt-ip4-filter-pri` then you can paste this into the correct place in the `dnscrypt-proxy.toml` file.
 
 I have ECS enabled as it will likely speed up requests and location based content delivery. If you want ultimate privacy you will want to disable the ECS functionality, though keep in mind it may slow down content delivery. This setting depends on your threat model. If you have facebook on your phone, that is a bigger privacy issue than ECS enabled so keep that in mind.
 
@@ -280,13 +264,13 @@ Uncomment out this line:
 
 `# server_names = ['scaleway-fr', 'google', 'yandex', 'cloudflare']`
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-10.png)
+![Alt text](image-10.png)
 
 We want to change this line to the following:
 
 `server_names = ['quad9-dnscrypt-ip4-filter-ecs-pri', 'quad9-dnscrypt-ip4-filter-ecs-alt', 'quad9-dnscrypt-ip6-filter-ecs-pri', 'quad9-dnscrypt-ip6-filter-ecs-alt']`
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-11.png)
+![Alt text](image-11.png)
 
 This is where you would choose to enable or disable filtering and ECS functionality. Replace the respective server names with the ones you wish to use.
 
@@ -296,7 +280,7 @@ Here is where we will specify our server list for DNScrypt to use.
 
 Here you can see the default settings.
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-12.png)
+![Alt text](image-12.png)
 
 This is where DNSCrypt was getting all of those public DNS resolvers we saw it running through before. We want to comment that section out and then enable the quad9 section.
 
@@ -412,7 +396,7 @@ Once you have it working close out the process with `ctrl + c`.
 
 Before we move on we need to make one last change in preparation for Pihole.
 
-We need to change the local host listening port for Pihole to forward the DNS requests to DNSCrypt-proxy.
+We need to change the local host listening port for Pihole to forward the DSN requests to.
 
 Let's update the config.
 
@@ -428,8 +412,8 @@ To:
 
 We can now save those changes with `ctrl + o` and `enter` then exit out with `ctrl + x`.
 
-
-### Step 8
+---
+#### Step 7
 
 Installing Pihole.
 
@@ -447,13 +431,16 @@ Install pihole:
 
 Follow through the pihole installation for which I wont document here as there exists a million others already.  
 
+*Make sure to set a manually assigned IP address to the system!*
+
 Once pihole is installed we can change the default generated password with this command:
 
 `pihole -a -p`
 
 Once you have changed the password it's time to put it all together.
 
-### Step 9
+---
+#### Step 8
 
 Installing DNSCrypt-proxy as a system service.
 
@@ -475,7 +462,8 @@ Now to install the DNSCrypt-proxy as a service.
 
 Now DNSCrypt-proxy will run on system boot and won't require an active console session.
 
-### Step 10
+---
+#### Step 9
 
 Linking it together.
 
@@ -493,11 +481,13 @@ IPv6:
 
 `::1#5353`
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-13.png)
+![Alt text](image-13.png)
 
 Scroll to the bottom and click Save.
 
-There may be an error displayed on the Pihole Admin page, that is ok. We will go back to our terminal and clear that.
+There may be an error displayed on the Pihole Admin page, that is ok.
+
+We will go back to our terminal and clear that.
 
 On the server run the following commands:
 
@@ -507,15 +497,14 @@ On the server run the following commands:
 
 These commands will clear any errors.
 
-The final step is to set your network to forward all DNS requests to the Pihole / DNSCrypt machine. This can be done in what ever router you use, most likely in the internet connection settings you have. I cannot help you there I am afraid. 
+Now the path is complete!
 
-E.g:
+The final step is to set your network to forward all DNS requests to the Pihole / DNSCrypt machine. This can be done in what ever router internet connection settings you have. I cannot help you there I am afraid. 
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-15.png)
+That should be it. It should be working now.
 
-Now the DNS communication path is complete!
-
-### Step 11
+---
+#### Step 10
 
 Ensuring your requests are actually encrypted!!!
 
@@ -535,16 +524,14 @@ You should get one of the following responses:
 
 ```
 
-![Alt text](https://github.com/crumpsandmuffin/Guides/blob/main/DNSCrypt%20and%20Pihole/Images/image-14.png)
+![Alt text](image-14.png)
 
-### Step 12
-
-Congratulations!
+---
+#### Congratulations!
 
 Now your DNS requests are all encrypted!
 
-I hope you found this guide helpful, thank you.
-
+---
 ### Helpful links
 
 https://docs.quad9.net/FAQs/#protocol-test-confirm-on-which-protocol-quad9-received-your-query
